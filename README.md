@@ -1,6 +1,6 @@
 # Simple Bars
 
-<img src="media/display.jpg" float="right" align="right">
+<img src="Media/display.jpg" float="right" align="right">
 
 > **A simple addon for World of Warcraft 1.12.1 giving you the freedom of customization.**
 
