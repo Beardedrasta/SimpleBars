@@ -16,6 +16,7 @@ element.enable = function()
     HealthBar:ClearAllPoints()
     HealthBar:SetPoint(SimpleBarsDB.healthFrame.point, UIParent, SimpleBarsDB.healthFrame.relativePoint, SimpleBarsDB.healthFrame.xOfs, SimpleBarsDB.healthFrame.yOfs)
     HealthBar:RegisterForDrag("LeftButton")
+    HealthBar:SetFrameLevel(1)
     HealthBorder:SetBackdrop({
         edgeFile = "Interface\\AddOns\\SimpleBars\\Media\\border.blp",
         edgeSize = 10,
@@ -94,12 +95,6 @@ element.enable = function()
         end
     end
 
-    do
-        UpdateHealth(HealthBar.statusBar, HealthBar.text)
-        UpdatePowerType(ManaBar.statusBar)
-        UpdateMana(ManaBar.statusBar, ManaBar.text)
-    end
-
     local manaUpdate = 0
     ManaBar:SetScript("OnUpdate", function()
         manaUpdate = manaUpdate + arg1
@@ -119,7 +114,7 @@ element.enable = function()
         end
     end)
 
-    local function UpdateHealthVisibility()
+    function statusbars:UpdateHealthVisibility()
         if SimpleBarsDB.enableHealth then
             HealthBar:Show()
         else
@@ -137,7 +132,7 @@ element.enable = function()
         ManaBorder:SetHeight(SimpleBarsDB.manaFrame.height + 10)
     end
 
-    local function UpdateManaVisibility()
+    function statusbars:UpdateManaVisibility()
         if SimpleBarsDB.enableMana then
             ManaBar:Show()
         else
@@ -145,11 +140,38 @@ element.enable = function()
         end
     end
 
+    local function UpdateFade()
+        if SimpleBarsDB.oocFade then
+            if InCombat() then
+                HealthBar:SetAlpha(1)
+                ManaBar:SetAlpha(1)
+            else
+                HealthBar:SetAlpha(SimpleBarsDB.oocFadeAlpha)
+                ManaBar:SetAlpha(SimpleBarsDB.oocFadeAlpha)
+            end
+        else
+            HealthBar:SetAlpha(1)
+            ManaBar:SetAlpha(1)
+        end
+    end
+
+    do
+        UpdateHealth(HealthBar.statusBar, HealthBar.text)
+        UpdatePowerType(ManaBar.statusBar)
+        UpdateMana(ManaBar.statusBar, ManaBar.text)
+        UpdateFade()
+    end
+
     statusbars:RegisterEvent("PLAYER_ENTERING_WORLD")
     statusbars:RegisterEvent("VARIABLES_LOADED")
+    statusbars:RegisterEvent("PLAYER_ENTER_COMBAT")
+    statusbars:RegisterEvent("PLAYER_LEAVE_COMBAT")
+    statusbars:RegisterEvent("PLAYER_REGEN_DISABLED")
+    statusbars:RegisterEvent("PLAYER_REGEN_ENABLED")
     statusbars:SetScript("OnEvent", function()
-        UpdateHealthVisibility()
-        UpdateManaVisibility()
+        statusbars:UpdateHealthVisibility()
+        statusbars:UpdateManaVisibility()
+        UpdateFade()
     end)
 
     SLASH_SIMPLEBARS1 = "/sb"
@@ -160,6 +182,8 @@ element.enable = function()
             print("/sb healthcolor - Toggle class color for health bar")
             print("/sb toggle health - Show/Hide the health bar")
             print("/sb toggle power - Show/Hide the mana bar")
+            print("/sb toggle ooc - Enables fade out of combat situations")
+            print("/sb ooc - Sets the fade amount for ooc fading")
             print("/sb health width <value> - Set the width of the health bar")
             print("/sb health height <value> - Set the height of the health bar")
             print("/sb mana width <value> - Set the width of the mana bar")
@@ -171,11 +195,17 @@ element.enable = function()
         elseif msg == "toggle health" then
             SimpleBarsDB.enableHealth = not SimpleBarsDB.enableHealth
             print("Health Bar: " .. (SimpleBarsDB.enableHealth and "Enabled" or "Disabled"))
-            UpdateHealthVisibility()
+            statusbars:UpdateHealthVisibility()
         elseif msg == "toggle power" then
             SimpleBarsDB.enableMana = not SimpleBarsDB.enableMana
             print("Mana Bar: " .. (SimpleBarsDB.enableMana and "Enabled" or "Disabled"))
-            UpdateManaVisibility()
+            statusbars:UpdateManaVisibility()
+        elseif msg == "toggle ooc" then
+            SimpleBarsDB.oocFade = not SimpleBarsDB.oocFade
+            print("Out of Combat fading: " .. (SimpleBarsDB.oocFade and "Enabled" or "Disabled"))
+            UpdateFade()
+        elseif msg == "ooc alpha" then
+            local value = tonumber(rest)
         elseif msg == "reset" then
             SimpleBarsDB = nil
             ReloadUI()
@@ -222,6 +252,22 @@ element.enable = function()
                             ManaBar:SetHeight(value)
                             ManaBorder:SetHeight(value + 10)
                             print("Mana Bar height set to " .. value)
+                        end
+                    end
+                elseif command == "ooc" then
+                    local secondSpace = string.find(rest, " ")
+
+                    if secondSpace then
+                        local subCommand = string.sub(rest, 1, secondSpace - 1)
+                        local value = tonumber(string.sub(rest, secondSpace + 1))
+                        if subCommand == "alpha" then 
+                            if value and value >= 0 and value <= 1 then
+                                SimpleBarsDB.oocFadeAlpha = value
+                                UpdateFade()
+                                print("Out of Combat Alpha: " .. value)
+                            else
+                                print("Invalid value. Please provide a value between 0.0 and 1.0.")
+                            end
                         end
                     end
                 end

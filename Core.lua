@@ -49,6 +49,8 @@ local defaults = {
         "Interface\\TargetingFrame\\UI-StatusBar",
         "Interface\\Tooltips\\UI-Tooltip-Background",
     },
+    oocFade = false,
+    oocFadeAlpha = 0.5,
     enableHealth = true,
     enableMana = true,
     useClassColorForHealth = true
