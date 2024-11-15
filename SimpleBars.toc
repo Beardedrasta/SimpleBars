@@ -1,0 +1,10 @@
+## Interface: 11200
+## Title: Simple Bars
+## Notes: Spawns movable resource bars.
+
+## Author: Rasta
+## Version: 1.0.0
+
+## SavedVariables: SimpleBarsDB
+
+SimpleBars.xml

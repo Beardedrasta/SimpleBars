@@ -1,0 +1,98 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/"   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"   xsi:schemaLocation="http://www.blizzard.com/wow/ui/"> 
+    <!-- Frame to handle all core events --> 
+    <Frame name="SimpleBarsHealthFrame" parent="UIParent" movable="true" enableMouse="true" topLevel="true">
+        <Size>
+            <AbsDimension x="150" y="20"/>
+        </Size>
+        <Anchors>
+            <Anchor point="CENTER" relativePoint="CENTER" x="0" y="-200"/>
+        </Anchors>
+        <Scripts>
+            <OnDragStart>
+                if IsShiftKeyDown() then
+                    SimpleBarsHealthFrame:StartMoving()
+                end
+            </OnDragStart>
+            <OnDragStop>
+                SimpleBarsHealthFrame:StopMovingOrSizing()
+                -- Save the position for next session
+                local point, relativeTo, relativePoint, xOfs, yOfs = SimpleBarsHealthFrame:GetPoint()
+                SimpleBarsDB.healthFrame.point = point
+                SimpleBarsDB.healthFrame.relativePoint = relativePoint
+                SimpleBarsDB.healthFrame.xOfs = xOfs
+                SimpleBarsDB.healthFrame.yOfs = yOfs
+            </OnDragStop>
+        </Scripts>
+
+        <Layers>
+            <Layer level="BACKGROUND">
+                <Texture name="$parentTexture" file="Interface\AddOns\SimpleBars\Media\background.blp">
+                    <Anchors>
+                        <Anchor point="ALL"/>
+                    </Anchors>
+                    <Color r="1.0" g="1.0" b="1.0" a="1.0"/>
+                </Texture>
+            </Layer>
+        </Layers>
+    </Frame>
+
+    <Frame name="$parentBorder" parent="SimpleBarsHealthFrame">
+        <Size>
+            <AbsDimension x="160" y="30"/>
+        </Size>
+        <Anchors>
+            <Anchor point="CENTER"/>
+        </Anchors>
+    </Frame>
+
+    <Frame name="SimpleBarsManaFrame" parent="UIParent" movable="true" enableMouse="true" topLevel="true">
+        <Size>
+            <AbsDimension x="150" y="20"/>
+        </Size>
+        <Anchors>
+            <Anchor point="CENTER" relativePoint="CENTER" x="0" y="-220"/>
+        </Anchors>
+        <Scripts>
+            <OnDragStart>
+                if IsShiftKeyDown() then
+                    SimpleBarsManaFrame:StartMoving()
+                end
+            </OnDragStart>
+            <OnDragStop>
+                SimpleBarsManaFrame:StopMovingOrSizing()
+                -- Save the position for next session
+                local point, relativeTo, relativePoint, xOfs, yOfs = SimpleBarsManaFrame:GetPoint()
+                SimpleBarsDB.manaFrame.point = point
+                SimpleBarsDB.manaFrame.relativePoint = relativePoint
+                SimpleBarsDB.manaFrame.xOfs = xOfs
+                SimpleBarsDB.manaFrame.yOfs = yOfs
+            </OnDragStop>
+        </Scripts>
+
+        <Layers>
+            <Layer level="BACKGROUND">
+                <Texture name="$parentTexture" file="Interface\AddOns\SimpleBars\Media\background.blp">
+                    <Anchors>
+                        <Anchor point="ALL"/>
+                    </Anchors>
+                    <Color r="1.0" g="1.0" b="1.0" a="1.0"/>
+                </Texture>
+            </Layer>
+        </Layers>
+    </Frame>
+
+    <Frame name="$parentBorder" parent="SimpleBarsManaFrame">
+        <Size>
+            <AbsDimension x="160" y="30"/>
+        </Size>
+        <Anchors>
+            <Anchor point="CENTER"/>
+        </Anchors>
+    </Frame>
+ 
+    <GameTooltip name="SB_toolTip" inherits="GameTooltipTemplate"/>
+
+    <Script file="Core.lua"/>
+    <Script file="SimpleBars.lua"/>
+ 
+ </Ui>
