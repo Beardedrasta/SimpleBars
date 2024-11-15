@@ -1,10 +1,15 @@
 ## Interface: 11200
 ## Title: Simple Bars
 ## Notes: Spawns movable resource bars.
+## OptionalDeps: Ace2, DruidLib
 
 ## Author: Rasta
 ## Version: 1.0.0
 
 ## SavedVariables: SimpleBarsDB
+
+Helpers\AceLibrary\AceLibrary.lua
+Helpers\AceEvent-2.0\AceEvent-2.0.lua
+Helpers\DruidLib-2.0\DruidLib-2.0.lua
 
 SimpleBars.xml
