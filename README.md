@@ -1,6 +1,6 @@
 # Simple Bars
 
-<img src="media/display.jpg" float="right" align="right">
+<img src="Media/display.jpg" float="right" align="right">
 
 > **A simple addon for World of Warcraft 1.12.1 giving you the freedom of customization.**
 
@@ -9,7 +9,7 @@ The goal of Simple Bars is to allow the user the ability to visualize the health
 Each element is designed to be simple, compact, and fit the wow theme asthetics.
 
 ## Installation
-1. Download **[Latest Version](https://github.com/Beardedrasta/SimpleBars/releases/tag/Release)**
+1. Download **[Latest Version](https://github.com/Beardedrasta/SimpleBars/releases/tag/master)**
 2. Unpack the Zip file
 3. Rename the folder "SimpleBars-Release" to "SimpleBars"
 4. Copy "SimpleBars" into WoW\Inteface\AddOns
