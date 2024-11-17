@@ -271,7 +271,11 @@ element.enable = function()
 
     function statusbars:UpdatePetVisibility()
         if SimpleBarsDB.enablePet then
-            PetBar:Show()
+            if playerClass == "HUNTER" or playerClass == "WARLOCK" then
+                PetBar:Show()
+            else
+                PetBar:Hide()
+            end
         else
             PetBar:Hide()
         end
