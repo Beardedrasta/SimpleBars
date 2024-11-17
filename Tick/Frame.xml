@@ -1,0 +1,71 @@
+
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
+C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
+
+    <Script file="Ticks.lua"/>
+    <Frame name="SimpleBars_TickOverlay" movable="false" hidden="false" parent="SimpleBarsManaFrame" enableMouse="false">
+        <Layers>
+            <Layer level="ARTWORK">
+                <FontString name="SimpleBars_TicksMana" hidden="false" inherits="GameFontNormal" text="">
+                    <Anchors>
+                        <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$parent">
+                            <Offset>
+                                <AbsDimension x="10" y="0"/>
+                            </Offset>
+                        </Anchor>
+                    </Anchors>
+                </FontString>
+            </Layer>
+        </Layers>
+        <Frames>
+            <StatusBar name="SimpleBars_ManaTickBar" inherits="TextStatusBar" hidden="false" enableMouse="false">
+                <Layers>
+                    <Layer level="OVERLAY">
+                        <Texture name="SimpleBars_ManaTickSpark" file="Interface\BUTTONS\WHITE8X8" alphaMode="GLOW" enableMouse="false">
+                            <Size>
+                                <AbsDimension x="2" y="30"/>
+                            </Size>
+                            <Anchors>
+                                <Anchor point="CENTER">
+                                    <Offset>
+                                        <AbsDimension x="0" y="0"/>
+                                    </Offset>
+                                </Anchor>
+                            </Anchors>
+                        </Texture>
+                    </Layer>
+                </Layers>
+                <BarTexture file="Interface\AddOns\SimpleBars\Media\statusbar-texture.blp"/>
+                <BarColor r="0" g="0.5" b="1" a="0"/>
+                <Scripts>
+                    <OnUpdate>
+                        SimpleBars_AnimateBar()
+                    </OnUpdate>
+                    <OnLoad>
+                        this:RegisterEvent("UNIT_MANA");
+                        this:RegisterEvent("UNIT_MAXMANA");
+                        this:RegisterEvent("VARIABLES_LOADED");
+                    </OnLoad>
+                </Scripts>
+            </StatusBar>
+        </Frames>
+        <Scripts>
+            <OnUpdate>
+                SimpleBars_FadeAll(arg1)
+            </OnUpdate>
+            <OnLoad>
+                this.update = 0;
+                this.alphamana = 1;
+                this.alphahealth = 1;
+                this.barValue = 0;
+                this:RegisterEvent("UNIT_MANA");
+                this:RegisterEvent("UNIT_MAXMANA");
+                this:RegisterEvent("VARIABLES_LOADED");
+            </OnLoad>
+            <OnEvent>
+                SimpleBars_OnEvent(event)
+            </OnEvent>
+        </Scripts>
+    </Frame>
+
+</Ui>

@@ -88,3 +88,7 @@ SimpleBars.register = function(_, element)
     SimpleBars.elements[element.title] = element
     return SimpleBars.elements[element.title]
 end
+
+function SB_print(text)
+    DEFAULT_CHAT_FRAME:AddMessage(text)
+end

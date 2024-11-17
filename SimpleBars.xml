@@ -1,5 +1,7 @@
 <Ui xmlns="http://www.blizzard.com/wow/ui/"   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"   xsi:schemaLocation="http://www.blizzard.com/wow/ui/"> 
     <!-- Frame to handle all core events --> 
+    <Script file="Core.lua"/>
+    <Script file="SimpleBars.lua"/>
     <Frame name="SimpleBarsHealthFrame" parent="UIParent" movable="true" enableMouse="true" topLevel="true">
         <Size>
             <AbsDimension x="150" y="20"/>
@@ -7,6 +9,52 @@
         <Anchors>
             <Anchor point="CENTER" relativePoint="CENTER" x="0" y="-200"/>
         </Anchors>
+        <Layers>
+            <Layer level="BACKGROUND">
+                <Texture name="$parentTexture" file="Interface\AddOns\SimpleBars\Media\background.blp">
+                    <Anchors>
+                        <Anchor point="ALL"/>
+                    </Anchors>
+                    <Color r="1.0" g="1.0" b="1.0" a="1.0"/>
+                </Texture>
+            </Layer>
+        </Layers>
+        <Frames>
+            <StatusBar name="SimpleBars_HealthBar" inherits="TextStatusBar" hidden="false">
+                <Anchors>
+                    <Anchor point="CENTER">
+                        <Offset>
+                            <AbsDimension x="0" y="0"/>
+                        </Offset>
+                    </Anchor>
+                </Anchors>
+                <Layers>
+                    <Layer level="ARTWORK">
+                        <FontString name="SimpleBars_HealthBarText" inherits="GameFontNormal" text="0/0">
+                            <Anchors>
+                                <Anchor point="CENTER">
+                                    <Offset>
+                                        <AbsDimension x="0" y="0"/>
+                                    </Offset>
+                                </Anchor>
+                            </Anchors>
+                        </FontString>
+                    </Layer>
+                </Layers>
+                <BarTexture file="Interface\AddOns\SimpleBars\Media\statusbar-texture.blp"/>
+                <Scripts>
+                    <OnLoad>
+                        this:RegisterEvent("PLAYER_AURAS_CHANGED");
+                        this:RegisterEvent("UNIT_HEALTH");
+                        this:RegisterEvent("UNIT_NAXHEALTH");
+                        this:RegisterEvent("PLAYER_ENTERING_WORLD");
+                    </OnLoad>
+                    <OnEvent>
+                        SetHealthEvent(event)
+                    </OnEvent>
+                </Scripts>
+            </StatusBar>
+        </Frames>
         <Scripts>
             <OnDragStart>
                 if IsShiftKeyDown() then
@@ -23,17 +71,6 @@
                 SimpleBarsDB.healthFrame.yOfs = yOfs
             </OnDragStop>
         </Scripts>
-
-        <Layers>
-            <Layer level="BACKGROUND">
-                <Texture name="$parentTexture" file="Interface\AddOns\SimpleBars\Media\background.blp">
-                    <Anchors>
-                        <Anchor point="ALL"/>
-                    </Anchors>
-                    <Color r="1.0" g="1.0" b="1.0" a="1.0"/>
-                </Texture>
-            </Layer>
-        </Layers>
     </Frame>
 
     <Frame name="$parentBorder" parent="SimpleBarsHealthFrame">
@@ -52,6 +89,88 @@
         <Anchors>
             <Anchor point="CENTER" relativePoint="CENTER" x="0" y="-220"/>
         </Anchors>
+        <Layers>
+            <Layer level="BACKGROUND">
+                <Texture name="$parentTexture" file="Interface\AddOns\SimpleBars\Media\background.blp">
+                    <Anchors>
+                        <Anchor point="ALL"/>
+                    </Anchors>
+                    <Color r="1.0" g="1.0" b="1.0" a="1.0"/>
+                </Texture>
+            </Layer>
+        </Layers>
+        <Frames>
+            <StatusBar name="SimpleBars_ManaBar" inherits="TextStatusBar" hidden="false">
+                <Anchors>
+                    <Anchor point="CENTER">
+                        <Offset>
+                            <AbsDimension x="0" y="0"/>
+                        </Offset>
+                    </Anchor>
+                </Anchors>
+                <Layers>
+                    <Layer level="ARTWORK">
+                        <FontString name="SimpleBars_ManaBarText" inherits="GameFontNormal" text="0/0">
+                            <Anchors>
+                                <Anchor point="CENTER">
+                                    <Offset>
+                                        <AbsDimension x="0" y="0"/>
+                                    </Offset>
+                                </Anchor>
+                            </Anchors>
+                        </FontString>
+                    </Layer>
+                </Layers>
+                <BarTexture file="Interface\AddOns\SimpleBars\Media\statusbar-texture.blp"/>
+                <Scripts>
+                    <OnLoad>
+                        this:RegisterEvent("PLAYER_AURAS_CHANGED");
+                        this:RegisterEvent("UNIT_MANA");
+                        this:RegisterEvent("UNIT_MAXMANA");
+                        this:RegisterEvent("PLAYER_ENTERING_WORLD");
+                    </OnLoad>
+                    <OnEvent>
+                        SetManaEvent(event)
+                    </OnEvent>
+                </Scripts>
+            </StatusBar>
+            <StatusBar name="SimpleBars_AltPower" hidden="false">
+                <Anchors>
+                    <Anchor point="TOP" relativePoint="BOTTOM" x="0" y="-1"/>
+                </Anchors>
+                <Layers>
+                    <Layer level="ARTWORK">
+                        <FontString name="SimpleBars_AltPowerText" inherits="GameFontNormal" text="0/0">
+                            <Anchors>
+                                <Anchor point="CENTER">
+                                    <Offset>
+                                        <AbsDimension x="0" y="0"/>
+                                    </Offset>
+                                </Anchor>
+                            </Anchors>
+                        </FontString>
+                    </Layer>
+                </Layers>
+                <BarTexture file="Interface\AddOns\SimpleBars\Media\statusbar-texture.blp"/>
+                <Scripts>
+                    <OnLoad>
+                        this:RegisterEvent("UNIT_MANA")
+                        this:RegisterEvent("UNIT_MAXMANA")
+                        this:RegisterEvent("PLAYER_AURAS_CHANGED")
+                        this:RegisterEvent("PLAYER_REGEN_ENABLED");
+                        this:RegisterEvent("PLAYER_REGEN_DISABLED");
+                        this:RegisterEvent("PLAYER_ENTERING_WORLD");
+                        this:RegisterEvent("SPELLCAST_STOP");
+                    </OnLoad>
+                    <OnEvent>
+                        AltOnEvent(event)
+                    </OnEvent>
+                    <OnUpdate>
+                        AltOnUpdate()
+                    </OnUpdate>
+                </Scripts>
+            </StatusBar>
+        </Frames>
         <Scripts>
             <OnDragStart>
                 if IsShiftKeyDown() then
@@ -68,17 +187,6 @@
                 SimpleBarsDB.manaFrame.yOfs = yOfs
             </OnDragStop>
         </Scripts>
-
-        <Layers>
-            <Layer level="BACKGROUND">
-                <Texture name="$parentTexture" file="Interface\AddOns\SimpleBars\Media\background.blp">
-                    <Anchors>
-                        <Anchor point="ALL"/>
-                    </Anchors>
-                    <Color r="1.0" g="1.0" b="1.0" a="1.0"/>
-                </Texture>
-            </Layer>
-        </Layers>
     </Frame>
 
     <Frame name="$parentBorder" parent="SimpleBarsManaFrame">
@@ -91,8 +199,5 @@
     </Frame>
  
     <GameTooltip name="SB_toolTip" inherits="GameTooltipTemplate"/>
-
-    <Script file="Core.lua"/>
-    <Script file="SimpleBars.lua"/>
  
  </Ui>

@@ -23,9 +23,6 @@ Each element is designed to be simple, compact, and fit the wow theme asthetics.
 **Power Bar**
 *Display the players power value in a statusbar, Current Power > Max Power text values.*
 
-**Alternative Power**
-*Display the players current mana while in druid forms*
-
 ## Commands
 
 **Shift + Drag**

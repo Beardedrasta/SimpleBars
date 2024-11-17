@@ -12,92 +12,28 @@ if not AceLibrary:HasInstance("AceEvent-2.0") then
 	error(MAJOR_VERSION .. " requires AceEent-2.0")
 end
 
+
+-- Initialization
 local DruidLib = {}
 local DruidLibTip = CreateFrame("GameTooltip", "DruidLibTip", nil, "GameTooltipTemplate")
 local DruidLibOnUpdateFrame = CreateFrame("Frame")
-
-local currInt = 0
-local maxMana = 0
-local currMana = 0
-local subtractMana = 0
-local extra = 0
-local lowregentimer = 0
-local fullmanatimer = 0
-local waitonce = nil
+local currMana, maxMana, currInt, subtractMana, lowregentimer, fullmanatimer, extra, waitonce = 0, 0, 0, 0, 0, 0, 0, nil
 local _, playerClass = UnitClass("player")
 local inform = UnitPowerType("player") ~= 0
 DruidLibTip:SetOwner(WorldFrame, "ANCHOR_NONE")
 
-local BaseMana = {
-	[1] =50,
-	[2] =57,
-	[3] =65,
-	[4] =74,
-	[5] =84,
-	[6] =95,
-	[7] =107,
-	[8] =120,
-	[9] =134,
-	[10] =149,
-	[11] =165,
-	[12] =182,
-	[13] =200,
-	[14] =219,
-	[15] =239,
-	[16] =260,
-	[17] =282,
-	[18] =305,
-	[19] =329,
-	[20] =354,
-	[21] =380,
-	[22] =392,
-	[23] =420,
-	[24] =449,
-	[25] =479,
-	[26] =509,
-	[27] =524,
-	[28] =554,
-	[29] =584,
-	[30] =614,
-	[31] =629,
-	[32] =659,
-	[33] =689,
-	[34] =704,
-	[35] =734,
-	[36] =749,
-	[37] =779,
-	[38] =809,
-	[39] =824,
-	[40] =854,
-	[41] =869,
-	[42] =899,
-	[43] =914,
-	[44] =944,
-	[45] =959,
-	[46] =989,
-	[47] =1004,
-	[48] =1019,
-	[49] =1049,
-	[50] =1064,
-	[51] =1079,
-	[52] =1109,
-	[53] =1124,
-	[54] =1139,
-	[55] =1154,
-	[56] =1169,
-	[57] =1199,
-	[58] =1214,
-	[59] =1229,
-	[60] =1244,
-}
+-- Base Mana values by player level
+local BaseMana = { [1] = 50, [2] = 57, [3] = 65, [4] = 74, [5] = 84, [6] = 95, [7] = 107, [8] = 120, [9] = 134, [10] = 149, [11] = 165, [12] = 182, [13] = 200, [14] = 219, [15] = 239, [16] = 260, [17] = 282, [18] = 305, [19] = 329, [20] = 354, [21] = 380, [22] = 392, [23] = 420, [24] = 449, [25] = 479, [26] = 509, [27] = 524, [28] = 554, [29] = 584, [30] = 614, [31] = 629, [32] = 659, [33] = 689, [34] = 704, [35] = 734, [36] = 749, [37] = 779, [38] = 809, [39] = 824, [40] = 854, [41] = 869, [42] = 899, [43] = 914, [44] = 944, [45] = 959, [46] = 989, [47] = 1004, [48] = 1019, [49] = 1049, [50] = 1064, [51] = 1079, [52] = 1109, [53] = 1124, [54] = 1139, [55] = 1154, [56] = 1169, [57] = 1199, [58] = 1214, [59] = 1229, [60] = 1244 }
 
+
+-- Activates the library instance
 local function activate(self, oldLib, oldDeactivate)
-	DruidLib = self
-	if oldLib then
-		oldLib:UnregisterAllEvents()
-		oldLib:CancelAllScheduledEvents()
-	end
-	if oldDeactivate then oldDeactivate(oldLib) end
+    DruidLib = self
+    if oldLib then
+        oldLib:UnregisterAllEvents()
+        oldLib:CancelAllScheduledEvents()
+    end
+    if oldDeactivate then oldDeactivate(oldLib) end
 end
 
 local function external(self, major, instance)
@@ -114,44 +50,46 @@ local function external(self, major, instance)
 	end
 end
 
+-- Updates mana values during OnUpdate events
 local timer = 0
-local function DruidLib_OnUpdate()
-	timer = timer + arg1
+local function DruidLib_OnUpdate(_)
+    timer = timer + arg1
 	if lowregentimer > 0 then
-		lowregentimer = lowregentimer - arg1
-		if lowregentimer <= 0 then
-			lowregentimer = 0
-		end
+		lowregentimer = lowregentimer - arg1;
+		if lowregentimer <= 0 then lowregentimer = 0; end
 	end
-	if UnitPowerType("player") ~= 0 then
-		fullmanatimer = fullmanatimer + arg1
-		if fullmanatimer > 6 and floor((currMana * 100) / maxMana) > 90 then
-			currMana = maxMana
+    if UnitPowerType("player") ~= 0 then
+		fullmanatimer = fullmanatimer + arg1;
+		if fullmanatimer > 6 and floor((currMana*100) / maxMana) > 90 then
+			currMana = maxMana;
 			local AceEvent = AceLibrary("AceEvent-2.0")
-			AceEvent:TriggerEvent("DruidLib_Manaupdate")
+			AceEvent:TriggerEvent("DruidManaLib_Manaupdate")
 		end
 	end
 end
 
+-- Initializes the library once AceEvent is ready
 function DruidLib:AceEvent_FullyInitialized()
-	if playerClass and playerClass == "DRUID" then
-		self:RegisterEvent("UNIT_MANA", "OnEvent")
-		self:RegisterEvent("UNIT_MAXMANA", "OnEvent")
-		self:RegisterEvent("PLAYER_REGEN_ENABLED", "OnEvent")
-		self:RegisterEvent("PLAYER_REGEN_DISABLED", "OnEvent")
-		self:RegisterEvent("UNIT_INVENTORY_CHANGED", "OnEvent")
-		self:RegisterEvent("PLAYER_AURAS_CHANGED", "OnEvent")
-		self:RegisterEvent("UPDATE_SHAPESHIFT_FORMS", "OnEvent")
-		self:RegisterEvent("SPELLCAST_STOP", "OnEvent")
-		currInt = UnitStat("player", 4)
-		maxMana = BaseMana[UnitLevel("player")] + 20 + (15 * (currInt - 20))
-		currMana = maxMana
-		self:MaxManaScript()
-		DruidLibOnUpdateFrame:SetScript("OnUpdate", DruidLib_OnUpdate)
-		self:TriggerEvent("DruidLib_Enabled")
-	end
+	if playerClass == "DRUID" then
+        self:RegisterEvent("UNIT_MANA", "OnEvent")
+        self:RegisterEvent("UNIT_MAXMANA", "OnEvent")
+        self:RegisterEvent("PLAYER_REGEN_ENABLED", "OnEvent")
+        self:RegisterEvent("PLAYER_REGEN_DISABLED", "OnEvent")
+        self:RegisterEvent("UNIT_INVENTORY_CHANGED", "OnEvent")
+        self:RegisterEvent("PLAYER_AURAS_CHANGED", "OnEvent")
+        self:RegisterEvent("UPDATE_SHAPESHIFT_FORMS", "OnEvent")
+        self:RegisterEvent("SPELLCAST_STOP", "OnEvent")
+        currInt = UnitStat("player", 4)
+        maxMana = BaseMana[UnitLevel("player")] + 20 + (15 * (currInt - 20))
+        currMana = maxMana
+        self:UpdateMaxMana()
+        DruidLibOnUpdateFrame:SetScript("OnUpdate", DruidLib_OnUpdate)
+        self:TriggerEvent("DruidLib_Enabled")
+    end
 end
 
+
+-- Calculates shapeshift cost by checking tooltip text
 function DruidLib:GetShapeshiftCost()
 	subtractMana = 0
 	local _, _, c, d = GetSpellTabInfo(4)
@@ -175,7 +113,8 @@ function DruidLib:GetShapeshiftCost()
 	end
 end
 
-function DruidLib:MaxManaScript()
+-- Updates maximum mana based on current intelligence and equipment
+function DruidLib:UpdateMaxMana()
 	local _, int = UnitStat("player", 4);
 	self:GetShapeshiftCost();
 	if UnitPowerType("player") == 0 then
@@ -264,9 +203,9 @@ end
 
 function DruidLib:OnEvent()
 	if event == "UNIT_MAXMANA" and arg1 == "player" then
-		self:MaxManaScript();
+		self:UpdateMaxMana();
 	elseif event == "UNIT_INVENTORY_CHANGED" and arg1 == "player" then
-		self:MaxManaScript();
+		self:UpdateMaxMana();
 	elseif event == "UNIT_MANA" and arg1 == "player" then
 		if UnitPowerType(arg1) == 0 then
 			currMana = UnitMana(arg1);
@@ -279,20 +218,15 @@ function DruidLib:OnEvent()
 		end
 		fullmanatimer = 0
 	elseif event == "PLAYER_AURAS_CHANGED" or event == "UPDATE_SHAPESHIFT_FORMS" then
-		if UnitPowerType("player") == 1 and not inform then
-			--Bear
+		if UnitPowerType("player") ~= 0 then
 			inform = true
-			self:Subtract()
-		elseif UnitPowerType("player") == 3 and not inform then
-			--Cat
-			inform = true
-			self:Subtract()
-		elseif UnitPowerType("player") == 0 and inform then
+			self:Subtract() -- Immediately subtract mana after form change
+			self.SpecialEventScheduler:TriggerEvent("DruidLib_Manaupdate")
+		elseif UnitPowerType("player") == 0 then
 			inform = nil
 			currMana = UnitMana("player")
 			maxMana = UnitManaMax("player")
 			self.SpecialEventScheduler:TriggerEvent("DruidLib_Manaupdate")
-			--player/aqua/travel
 		end
 	elseif (event == "SPELLCAST_STOP") then
 		if UnitPowerType("player") == 0 then
