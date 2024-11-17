@@ -10,6 +10,7 @@ local element = SimpleBars:register({
 
 -- Library reference for Druid-specific functionality
 local DruidLib = AceLibrary("DruidLib-2.0")
+local _, playerClass = UnitClass("player")
 -- Function to initialize the element
 element.enable = function()
     -- Create main frame for status bars
@@ -68,6 +69,7 @@ element.enable = function()
     AltPower:SetHeight(12)
     AltPower:SetStatusBarColor(unpack(manaSettings.statusBarColor.mana))
     AltPower:SetFrameLevel(1)
+    AltPower:Hide()
 
     local bg = AltPower:CreateTexture("$parentBackground", "BACKGROUND")
     bg:SetAllPoints(AltPower)
@@ -109,7 +111,7 @@ element.enable = function()
     end
 
     local function UpdateAltPower()
-        if UnitPowerType("player") ~= 0 then
+        if UnitPowerType("player") ~= 0 and playerClass == "DRUID" then
             AltPower:Show()
             AltPower.bd:SetWidth(manaSettings.width / 2 + 14)
         else
@@ -185,6 +187,10 @@ element.enable = function()
             UpdateMana(ManaStatus, ManaText)
             UpdatePowerType(ManaStatus)
         end
+        if event == "UNIT_ENERGY" or event == "UNIT_MAXENERGY" then
+            UpdateMana(ManaStatus, ManaText)
+            UpdatePowerType(ManaStatus)
+        end
     end
 
     function SetHealthEvent(event)
@@ -220,7 +226,7 @@ element.enable = function()
         ManaBar.border:SetWidth(manaSettings.width + 14)
         ManaBar.border:SetHeight(manaSettings.height + 14)
         AltPower:SetWidth(manaSettings.width / 2)
-        AltPower.bd:SetWidth(manaSettings.height / 2 + 14)
+        AltPower.bd:SetWidth(manaSettings.width / 2 + 14)
     end
 
     local function UpdateFade()

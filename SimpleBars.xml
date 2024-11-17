@@ -127,6 +127,8 @@
                         this:RegisterEvent("PLAYER_AURAS_CHANGED");
                         this:RegisterEvent("UNIT_MANA");
                         this:RegisterEvent("UNIT_MAXMANA");
+                        this:RegisterEvent("UNIT_ENERGY");
+                        this:RegisterEvent("UNIT_MAXENERGY");
                         this:RegisterEvent("PLAYER_ENTERING_WORLD");
                     </OnLoad>
                     <OnEvent>
