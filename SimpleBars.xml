@@ -199,6 +199,86 @@
             <Anchor point="CENTER"/>
         </Anchors>
     </Frame>
+
+    <Frame name="SimpleBarsPetFrame" parent="UIParent" movable="true" enableMouse="true" topLevel="true">
+        <Size>
+            <AbsDimension x="75" y="20"/>
+        </Size>
+        <Anchors>
+            <Anchor point="CENTER" relativePoint="CENTER" x="-150" y="-200"/>
+        </Anchors>
+        <Layers>
+            <Layer level="BACKGROUND">
+                <Texture name="$parentTexture" file="Interface\AddOns\SimpleBars\Media\background.blp">
+                    <Anchors>
+                        <Anchor point="ALL"/>
+                    </Anchors>
+                    <Color r="1.0" g="1.0" b="1.0" a="1.0"/>
+                </Texture>
+            </Layer>
+        </Layers>
+        <Frames>
+            <StatusBar name="SimpleBars_PetBar" inherits="TextStatusBar" hidden="false">
+                <Anchors>
+                    <Anchor point="CENTER">
+                        <Offset>
+                            <AbsDimension x="0" y="0"/>
+                        </Offset>
+                    </Anchor>
+                </Anchors>
+                <Layers>
+                    <Layer level="ARTWORK">
+                        <FontString name="SimpleBars_PetBarText" inherits="GameFontNormal" text="0/0">
+                            <Anchors>
+                                <Anchor point="CENTER">
+                                    <Offset>
+                                        <AbsDimension x="0" y="0"/>
+                                    </Offset>
+                                </Anchor>
+                            </Anchors>
+                        </FontString>
+                    </Layer>
+                </Layers>
+                <BarTexture file="Interface\AddOns\SimpleBars\Media\statusbar-texture.blp"/>
+                <Scripts>
+                    <OnLoad>
+                        this:RegisterEvent("PLAYER_AURAS_CHANGED");
+                        this:RegisterEvent("UNIT_HEALTH");
+                        this:RegisterEvent("UNIT_NAXHEALTH");
+                        this:RegisterEvent("PLAYER_ENTERING_WORLD");
+                    </OnLoad>
+                    <OnEvent>
+                        SetPetEvent(event)
+                    </OnEvent>
+                </Scripts>
+            </StatusBar>
+        </Frames>
+        <Scripts>
+            <OnDragStart>
+                if IsShiftKeyDown() then
+                SimpleBarsPetFrame:StartMoving()
+                end
+            </OnDragStart>
+            <OnDragStop>
+                SimpleBarsPetFrame:StopMovingOrSizing()
+                -- Save the position for next session
+                local point, relativeTo, relativePoint, xOfs, yOfs = SimpleBarsPetFrame:GetPoint()
+                SimpleBarsDB.petFrame.point = point
+                SimpleBarsDB.petFrame.relativePoint = relativePoint
+                SimpleBarsDB.petFrame.xOfs = xOfs
+                SimpleBarsDB.petFrame.yOfs = yOfs
+            </OnDragStop>
+        </Scripts>
+    </Frame>
+
+    <Frame name="$parentBorder" parent="SimpleBarsPetFrame">
+        <Size>
+            <AbsDimension x="160" y="30"/>
+        </Size>
+        <Anchors>
+            <Anchor point="CENTER"/>
+        </Anchors>
+    </Frame>
  
     <GameTooltip name="SB_toolTip" inherits="GameTooltipTemplate"/>
  

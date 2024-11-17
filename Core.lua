@@ -44,6 +44,19 @@ local defaults = {
         backgroundTexture = "Interface\\AddOns\\SimpleBars\\Media\\background.blp",
         backgroundColor = { 1, 1, 1, 1 },
     },
+    petFrame = {
+        width = 75,
+        height = 20,
+        point = "CENTER",
+        relativeTo = "UIParent",
+        relativePoint = "CENTER",
+        xOfs = -150,
+        yOfs = -200,
+        statusBarTexture = "Interface\\AddOns\\SimpleBars\\Media\\statusbar-texture.blp",
+        statusBarColor = { 0.33, 0.68, 0.33 },
+        backgroundTexture = "Interface\\AddOns\\SimpleBars\\Media\\background.blp",
+        backgroundColor = { 1, 1, 1, 1 },
+    },
     textures = {
         "Interface\\BUTTONS\\WHITE8X8",
         "Interface\\TargetingFrame\\UI-StatusBar",
@@ -53,6 +66,7 @@ local defaults = {
     oocFadeAlpha = 0.5,
     enableHealth = true,
     enableMana = true,
+    enablePet = true,
     useClassColorForHealth = true
 }
 

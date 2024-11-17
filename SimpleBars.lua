@@ -31,11 +31,11 @@ element.enable = function()
     end
 
     -- Health and Mana frame references
-    local HealthBar, ManaBar = _G["SimpleBarsHealthFrame"], _G["SimpleBarsManaFrame"]
-    local HealthStatus, ManaStatus = _G["SimpleBars_HealthBar"], _G["SimpleBars_ManaBar"]
-    local HealthText, ManaText = _G["SimpleBars_HealthBarText"], _G["SimpleBars_ManaBarText"]
+    local HealthBar, ManaBar, PetBar = _G["SimpleBarsHealthFrame"], _G["SimpleBarsManaFrame"], _G["SimpleBarsPetFrame"]
+    local HealthStatus, ManaStatus, PetStatus = _G["SimpleBars_HealthBar"], _G["SimpleBars_ManaBar"], _G["SimpleBars_PetBar"]
+    local HealthText, ManaText, PetText = _G["SimpleBars_HealthBarText"], _G["SimpleBars_ManaBarText"], _G["SimpleBars_PetBarText"]
     local AltPower, AltPowerText = _G["SimpleBars_AltPower"], _G["SimpleBars_AltPowerText"]
-    local healthSettings, manaSettings = SimpleBarsDB.healthFrame, SimpleBarsDB.manaFrame
+    local healthSettings, manaSettings, petSettings = SimpleBarsDB.healthFrame, SimpleBarsDB.manaFrame, SimpleBarsDB.petFrame
 
     -- Initialize Health Bar
     HealthBar:ClearAllPoints()
@@ -63,6 +63,21 @@ element.enable = function()
     ManaStatus:SetFrameLevel(3)
     ManaBar.border = InitializeBorder(ManaBar, "Interface\\AddOns\\SimpleBars\\Media\\border.blp")
     ManaBar.border:SetPoint("CENTER", 0, 0)
+
+
+    -- Initialize Pet Bar
+    PetBar:ClearAllPoints()
+    PetBar:SetPoint(petSettings.point, UIParent, petSettings.relativePoint, petSettings.xOfs, petSettings.yOfs)
+    PetBar:RegisterForDrag("LeftButton")
+    PetBar:SetFrameLevel(3)
+    PetStatus:ClearAllPoints()
+    PetStatus:SetAllPoints(PetBar)
+    PetStatus:SetMinMaxValues(0, UnitHealthMax("player"))
+    PetStatus:SetStatusBarColor(unpack(petSettings.statusBarColor))
+    PetStatus:SetFrameLevel(3)
+    PetBar.border = InitializeBorder(PetBar, "Interface\\AddOns\\SimpleBars\\Media\\border.blp")
+    PetBar.border:SetPoint("CENTER", 0, 0)
+
 
 
     AltPower:SetWidth(manaSettings.width / 2)
@@ -168,6 +183,23 @@ element.enable = function()
         fontString:SetText(currentMana .. " / " .. maxMana)
     end
 
+    local function UpdatePet(statusbar, fontString)
+        local currHealth = UnitHealth("pet")
+        local maxHealth = UnitHealthMax("pet")
+        if SimpleBarsDB.useClassColorForHealth then
+            local _, class = UnitClass("player")
+            local classColor = RAID_CLASS_COLORS[class]
+            if classColor then
+                statusbar:SetStatusBarColor(classColor.r, classColor.g, classColor.b)
+            end
+        else
+            statusbar:SetStatusBarColor(unpack(petSettings.statusBarColor))
+        end
+        statusbar:SetMinMaxValues(0, maxHealth)
+        statusbar:SetValue(currHealth)
+        fontString:SetText(currHealth .. " / " .. maxHealth)
+    end
+
     local function UpdatePowerType(statusbar)
         local powerType = UnitPowerType("player")
         if powerType == 0 then
@@ -196,8 +228,16 @@ element.enable = function()
     function SetHealthEvent(event)
         if event == "PLAYER_ENTERING_WORLD" then
             UpdateHealth(HealthStatus, HealthText)
-        elseif event == "UNIT_HEALTH" or event == "UNIT_HEALTHMAX" or event == "PLAYER_AURAS_CHANGED" then
+        elseif event == "UNIT_HEALTH" or event == "UNIT_MAXHEALTH" or event == "PLAYER_AURAS_CHANGED" then
             UpdateHealth(HealthStatus, HealthText)
+        end
+    end
+
+    function SetPetEvent(event)
+        if event == "PLAYER_ENTERING_WORLD" then
+            UpdatePet(PetStatus, PetText)
+        elseif event == "UNIT_HEALTH" or event == "UNIT_MAXHEALTH" or event == "PLAYER_AURAS_CHANGED" then
+            UpdatePet(PetStatus, PetText)
         end
     end
 
@@ -229,18 +269,33 @@ element.enable = function()
         AltPower.bd:SetWidth(manaSettings.width / 2 + 14)
     end
 
+    function statusbars:UpdatePetVisibility()
+        if SimpleBarsDB.enablePet then
+            PetBar:Show()
+        else
+            PetBar:Hide()
+        end
+        PetBar:SetWidth(petSettings.width)
+        PetBar:SetHeight(petSettings.height)
+        PetBar.border:SetWidth(petSettings.width + 14)
+        PetBar.border:SetHeight(petSettings.height + 14)
+    end
+
     local function UpdateFade()
         if SimpleBarsDB.oocFade then
             if UnitAffectingCombat("player") then
                 HealthBar:SetAlpha(1)
                 ManaBar:SetAlpha(1)
+                PetBar:SetAlpha(1)
             else
                 HealthBar:SetAlpha(SimpleBarsDB.oocFadeAlpha)
                 ManaBar:SetAlpha(SimpleBarsDB.oocFadeAlpha)
+                PetBar:SetAlpha(SimpleBarsDB.oocFadeAlpha)
             end
         else
             HealthBar:SetAlpha(1)
             ManaBar:SetAlpha(1)
+            PetBar:SetAlpha(1)
         end
     end
 
@@ -249,6 +304,7 @@ element.enable = function()
     local function OnEvent(self, event)
         statusbars:UpdateHealthVisibility()
         statusbars:UpdateManaVisibility()
+        statusbars:UpdatePetVisibility()
         UpdateFade()
     end
 
@@ -268,12 +324,15 @@ element.enable = function()
             SB_print("/sb healthcolor - Toggle class color for health bar")
             SB_print("/sb toggle health - Show/Hide the health bar")
             SB_print("/sb toggle power - Show/Hide the mana bar")
+            SB_print("/sb toggle pet - Show/Hide the pet bar")
             SB_print("/sb toggle ooc - Enables fade out of combat situations")
             SB_print("/sb ooc - Sets the fade amount for ooc fading")
             SB_print("/sb health width <value> - Set the width of the health bar")
             SB_print("/sb health height <value> - Set the height of the health bar")
             SB_print("/sb mana width <value> - Set the width of the mana bar")
             SB_print("/sb mana height <value> - Set the height of the mana bar")
+            SB_print("/sb pet width <value> - Set the width of the pet bar")
+            SB_print("/sb pet height <value> - Set the height of the pet bar")
         elseif msg == "healthcolor" then
             SimpleBarsDB.useClassColorForHealth = not SimpleBarsDB.useClassColorForHealth
             SB_print("Class color for health bar: " .. (SimpleBarsDB.useClassColorForHealth and "Enabled" or "Disabled"))
@@ -286,6 +345,10 @@ element.enable = function()
             SimpleBarsDB.enableMana = not SimpleBarsDB.enableMana
             SB_print("Mana Bar: " .. (SimpleBarsDB.enableMana and "Enabled" or "Disabled"))
             statusbars:UpdateManaVisibility()
+        elseif msg == "toggle pet" then
+            SimpleBarsDB.enablePet = not SimpleBarsDB.enablePet
+            SB_print("Pet Bar: ".. (SimpleBarsDB.enablePet and "Enabled" or "Disabled"))
+            statusbars:UpdatePetVisibility()
         elseif msg == "toggle ooc" then
             SimpleBarsDB.oocFade = not SimpleBarsDB.oocFade
             SB_print("Out of Combat fading: " .. (SimpleBarsDB.oocFade and "Enabled" or "Disabled"))
@@ -341,6 +404,24 @@ element.enable = function()
                             ManaBar.border:SetHeight(value + 14)
                             _G["SimpleBars_ManaTickSpark"]:SetHeight(SimpleBarsDB.manaFrame.height)
                             SB_print("Mana Bar height set to " .. value)
+                        end
+                    end
+                elseif command == "pet" then
+                    local secondSpace = string.find(rest, " ")                   
+                    if secondSpace then
+                        local subCommand = string.sub(rest, 1, secondSpace - 1)
+                        local value = tonumber(string.sub(rest, secondSpace + 1))
+
+                        if subCommand == "width" and value then
+                            SimpleBarsDB.petFrame.width = value
+                            PetBar:SetWidth(value)
+                            PetBar.border:SetWidth(value + 14)
+                            SB_print("Pet Bar width set to " .. value)
+                        elseif subCommand == "height" and value then
+                            SimpleBarsDB.petFrame.height = value
+                            PetBar:SetHeight(value)
+                            PetBar.border:SetHeight(value + 14)
+                            SB_print("Pet Bar height set to " .. value)
                         end
                     end
                 elseif command == "ooc" then
