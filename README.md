@@ -9,7 +9,7 @@ The goal of Simple Bars is to allow the user the ability to visualize the health
 Each element is designed to be simple, compact, and fit the wow theme asthetics.
 
 ## Installation
-1. Download **[Latest Version](https://github.com/Beardedrasta/SimpleBars/releases/tag/master)**
+1. Download **[Latest Version](https://github.com/Beardedrasta/SimpleBars/archive/refs/heads/main.zip)**
 2. Unpack the Zip file
 3. Rename the folder "SimpleBars-main" to "SimpleBars"
 4. Copy "SimpleBars" into WoW\Inteface\AddOns
