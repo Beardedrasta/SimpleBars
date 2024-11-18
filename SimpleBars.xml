@@ -139,6 +139,8 @@
                         this:RegisterEvent("UNIT_MAXMANA");
                         this:RegisterEvent("UNIT_ENERGY");
                         this:RegisterEvent("UNIT_MAXENERGY");
+                        this:RegisterEvent("UNIT_RAGE");
+                        this:RegisterEvent("UNIT_MAXRAGE");
                         this:RegisterEvent("PLAYER_ENTERING_WORLD");
                     </OnLoad>
                     <OnEvent>

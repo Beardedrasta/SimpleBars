@@ -259,6 +259,10 @@ element.enable = function()
             UpdateMana(ManaStatus, ManaText)
             UpdatePowerType(ManaStatus)
         end
+        if event =="UNIT_RAGE" or event == "UNIT_MAXRAGE" then
+            UpdateMana(ManaStatus, ManaText)
+            UpdatePowerType(ManaStatus)
+        end
     end
 
     function SetHealthEvent(event)
