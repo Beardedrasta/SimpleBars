@@ -31,6 +31,9 @@ Each element is designed to be simple, compact, and fit the wow theme asthetics.
 **/sb**
 *Display a list of all the current commands*
 
+**/sb config**
+*Opens the options configuration panel*
+
 **/sb toggle health**
 *Toggles the health statusbar, Enabled = Shown : Disabled = Hidden*
 
