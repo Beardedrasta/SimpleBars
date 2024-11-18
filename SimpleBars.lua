@@ -9,7 +9,7 @@ local element = SimpleBars:register({
 })
 
 -- Library reference for Druid-specific functionality
-local DruidLib = AceLibrary("DruidLib-2.0")
+local DruidLib = AceLibrary("DruidManaLib-1.0")
 local _, playerClass = UnitClass("player")
 -- Function to initialize the element
 element.enable = function()
@@ -47,6 +47,12 @@ element.enable = function()
     HealthStatus:SetMinMaxValues(0, UnitHealthMax("player"))
     HealthStatus:SetStatusBarColor(unpack(healthSettings.statusBarColor))
     HealthStatus:SetFrameLevel(3)
+    HealthText:ClearAllPoints()
+    HealthText:SetPoint("CENTER", HealthStatus, "CENTER", 0, 0)
+    HealthText:SetWidth(SimpleBarsDB.manaFrame.width)
+    HealthText:SetFontObject(SimpleBarsCustomFont)
+    HealthText:SetJustifyH("CENTER")
+    HealthText:Hide()
     HealthBar.border = InitializeBorder(HealthBar, "Interface\\AddOns\\SimpleBars\\Media\\border.blp")
     HealthBar.border:SetPoint("CENTER", 0, 0)
 
@@ -61,6 +67,12 @@ element.enable = function()
     ManaStatus:SetValue(UnitMana("player"))
     ManaStatus:SetStatusBarColor(unpack(manaSettings.statusBarColor.mana))
     ManaStatus:SetFrameLevel(3)
+    ManaText:ClearAllPoints()
+    ManaText:SetPoint("CENTER", ManaStatus, "CENTER", 0, 0)
+    ManaText:SetWidth(SimpleBarsDB.manaFrame.width)
+    ManaText:SetFontObject(SimpleBarsCustomFont)
+    ManaText:SetJustifyH("CENTER")
+    ManaText:Hide()
     ManaBar.border = InitializeBorder(ManaBar, "Interface\\AddOns\\SimpleBars\\Media\\border.blp")
     ManaBar.border:SetPoint("CENTER", 0, 0)
 
@@ -75,9 +87,9 @@ element.enable = function()
     PetStatus:SetMinMaxValues(0, UnitHealthMax("player"))
     PetStatus:SetStatusBarColor(unpack(petSettings.statusBarColor))
     PetStatus:SetFrameLevel(3)
+    PetText:SetFontObject(SimpleBarsCustomFont_Pet)
     PetBar.border = InitializeBorder(PetBar, "Interface\\AddOns\\SimpleBars\\Media\\border.blp")
     PetBar.border:SetPoint("CENTER", 0, 0)
-
 
 
     AltPower:SetWidth(manaSettings.width / 2)
@@ -85,6 +97,8 @@ element.enable = function()
     AltPower:SetStatusBarColor(unpack(manaSettings.statusBarColor.mana))
     AltPower:SetFrameLevel(1)
     AltPower:Hide()
+    AltPowerText:SetFontObject(SimpleBarsCustomFont_Alt)
+    AltPowerText:Hide()
 
     local bg = AltPower:CreateTexture("$parentBackground", "BACKGROUND")
     bg:SetAllPoints(AltPower)
@@ -114,9 +128,31 @@ element.enable = function()
     AltPower.bd = bd ]]
 
 
-	--SetTextStatusBarText(AltPower, AltPowerText)
+	SetTextStatusBarText(AltPower, AltPowerText)
 	AltPower.textLockable = 1
 	AltPower.text = AltPowerText
+
+    local function SetupMouseover(frame, text)
+        frame:SetScript("OnEnter", function()
+            text:Show()
+        end)
+
+        frame:SetScript("OnLeave", function()
+            text:Hide()
+        end)
+    end
+
+    if SimpleBarsDB.mouseOverText then
+        SetupMouseover(HealthBar, HealthText)
+        SetupMouseover(ManaBar, ManaText)
+        SetupMouseover(PetBar, PetText)
+        SetupMouseover(AltPower, AltPowerText)
+    else
+        HealthText:Show()
+        ManaText:Show()
+        PetText:Show()
+        AltPowerText:Show()
+    end
 
     local function UpdateAltPowerValue()
         local currMana, maxMana = DruidLib:GetMana()
@@ -156,7 +192,7 @@ element.enable = function()
 
 
     -- Function to update health bar values
-    local function UpdateHealth(statusbar, fontString)
+    function SB_UpdateHealth(statusbar, fontString)
         local currentHealth = UnitHealth("player")
         local maxHealth = UnitHealthMax("player")
         if SimpleBarsDB.useClassColorForHealth then
@@ -227,9 +263,9 @@ element.enable = function()
 
     function SetHealthEvent(event)
         if event == "PLAYER_ENTERING_WORLD" then
-            UpdateHealth(HealthStatus, HealthText)
+            SB_UpdateHealth(HealthStatus, HealthText)
         elseif event == "UNIT_HEALTH" or event == "UNIT_MAXHEALTH" or event == "PLAYER_AURAS_CHANGED" then
-            UpdateHealth(HealthStatus, HealthText)
+            SB_UpdateHealth(HealthStatus, HealthText)
         end
     end
 
@@ -243,7 +279,7 @@ element.enable = function()
 
 
     -- Update functions to manage bar visibility
-    function statusbars:UpdateHealthVisibility()
+    function SB_UpdateHealthVisibility()
         if SimpleBarsDB.enableHealth then
             HealthBar:Show()
         else
@@ -255,7 +291,7 @@ element.enable = function()
         HealthBar.border:SetHeight(healthSettings.height + 14)
     end
 
-    function statusbars:UpdateManaVisibility()
+    function SB_UpdateManaVisibility()
         if SimpleBarsDB.enableMana then
             ManaBar:Show()
         else
@@ -269,7 +305,7 @@ element.enable = function()
         AltPower.bd:SetWidth(manaSettings.width / 2 + 14)
     end
 
-    function statusbars:UpdatePetVisibility()
+    function SB_UpdatePetVisibility()
         if SimpleBarsDB.enablePet then
             if playerClass == "HUNTER" or playerClass == "WARLOCK" then
                 PetBar:Show()
@@ -285,7 +321,7 @@ element.enable = function()
         PetBar.border:SetHeight(petSettings.height + 14)
     end
 
-    local function UpdateFade()
+    function SB_UpdateFade()
         if SimpleBarsDB.oocFade then
             if UnitAffectingCombat("player") then
                 HealthBar:SetAlpha(1)
@@ -306,10 +342,13 @@ element.enable = function()
 
     -- Event handling for updating the status bars
     local function OnEvent(self, event)
-        statusbars:UpdateHealthVisibility()
-        statusbars:UpdateManaVisibility()
-        statusbars:UpdatePetVisibility()
-        UpdateFade()
+        SB_UpdateHealthVisibility()
+        SB_UpdateManaVisibility()
+        SB_UpdatePetVisibility()
+        SB_UpdateFade()
+        SimpleBarsCustomFont:SetFont(SimpleBarsDB.globalFont, 14, "")
+        SimpleBarsCustomFont_Alt:SetFont(SimpleBarsDB.globalFont, 12, "")
+        SimpleBarsCustomFont_Pet:SetFont(SimpleBarsDB.globalFont, 12, "")
     end
 
     statusbars:RegisterEvent("PLAYER_ENTERING_WORLD")
@@ -325,6 +364,7 @@ element.enable = function()
         msg = string.lower(msg)
         if msg == "" or msg == nil then
             SB_print("SimpleBars Commands:")
+            SB_print("/sb config - Opens the addon options configuration")
             SB_print("/sb healthcolor - Toggle class color for health bar")
             SB_print("/sb toggle health - Show/Hide the health bar")
             SB_print("/sb toggle power - Show/Hide the mana bar")
@@ -337,26 +377,28 @@ element.enable = function()
             SB_print("/sb mana height <value> - Set the height of the mana bar")
             SB_print("/sb pet width <value> - Set the width of the pet bar")
             SB_print("/sb pet height <value> - Set the height of the pet bar")
+        elseif msg == "config" then
+            SB_ToggleOptions()
         elseif msg == "healthcolor" then
             SimpleBarsDB.useClassColorForHealth = not SimpleBarsDB.useClassColorForHealth
             SB_print("Class color for health bar: " .. (SimpleBarsDB.useClassColorForHealth and "Enabled" or "Disabled"))
-            UpdateHealth(HealthBar.statusBar, HealthBar.text)
+            SB_UpdateHealth(HealthStatus, HealthText)
         elseif msg == "toggle health" then
             SimpleBarsDB.enableHealth = not SimpleBarsDB.enableHealth
             SB_print("Health Bar: " .. (SimpleBarsDB.enableHealth and "Enabled" or "Disabled"))
-            statusbars:UpdateHealthVisibility()
+            SB_UpdateHealthVisibility()
         elseif msg == "toggle power" then
             SimpleBarsDB.enableMana = not SimpleBarsDB.enableMana
             SB_print("Mana Bar: " .. (SimpleBarsDB.enableMana and "Enabled" or "Disabled"))
-            statusbars:UpdateManaVisibility()
+            SB_UpdateManaVisibility()
         elseif msg == "toggle pet" then
             SimpleBarsDB.enablePet = not SimpleBarsDB.enablePet
             SB_print("Pet Bar: ".. (SimpleBarsDB.enablePet and "Enabled" or "Disabled"))
-            statusbars:UpdatePetVisibility()
+            SB_UpdatePetVisibility()
         elseif msg == "toggle ooc" then
             SimpleBarsDB.oocFade = not SimpleBarsDB.oocFade
             SB_print("Out of Combat fading: " .. (SimpleBarsDB.oocFade and "Enabled" or "Disabled"))
-            UpdateFade()
+            SB_UpdateFade()
         elseif msg == "ooc alpha" then
             local value = tonumber(rest)
         elseif msg == "reset" then
@@ -378,13 +420,11 @@ element.enable = function()
 
                         if subCommand == "width" and value then
                             SimpleBarsDB.healthFrame.width = value
-                            HealthBar:SetWidth(value)
-                            HealthBar.border:SetWidth(value + 14)
+                            SB_UpdateHealthVisibility()
                             SB_print("Health Bar width set to " .. value)
                         elseif subCommand == "height" and value then
                             SimpleBarsDB.healthFrame.height = value
-                            HealthBar:SetHeight(value)
-                            HealthBar.border:SetHeight(value + 14)
+                            SB_UpdateHealthVisibility()
                             SB_print("Health Bar height set to " .. value)
                         end
                     end
@@ -437,7 +477,7 @@ element.enable = function()
                         if subCommand == "alpha" then
                             if value and value >= 0 and value <= 1 then
                                 SimpleBarsDB.oocFadeAlpha = value
-                                UpdateFade()
+                                SB_UpdateFade()
                                 SB_print("Out of Combat Alpha: " .. value)
                             else
                                 SB_print("Invalid value. Please provide a value between 0.0 and 1.0.")
