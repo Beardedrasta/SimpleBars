@@ -23,6 +23,12 @@ Each element is designed to be simple, compact, and fit the wow theme asthetics.
 **Power Bar**
 *Display the players power value in a statusbar, Current Power > Max Power text values.*
 
+**Druid Bar**
+*Display the players mana value in a statusbar in form, Current Mana > Max Mana text values.*
+
+**Pet Bar**
+*Display the players pet health value in a statusbar, Current Health > Max Health text values.*
+
 ## Commands
 
 **Shift + Drag**
