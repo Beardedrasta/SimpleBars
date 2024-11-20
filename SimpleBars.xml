@@ -12,7 +12,7 @@
     
     <Script file="Core.lua"/>
     <Script file="SimpleBars.lua"/>
-    <Frame name="SimpleBarsHealthFrame" parent="UIParent" movable="true" enableMouse="true" topLevel="true">
+    <Button name="SimpleBarsHealthFrame" parent="UIParent" movable="true" enableMouse="true" topLevel="true">
         <Size>
             <AbsDimension x="150" y="20"/>
         </Size>
@@ -81,7 +81,7 @@
                 SimpleBarsDB.healthFrame.yOfs = yOfs
             </OnDragStop>
         </Scripts>
-    </Frame>
+    </Button>
 
     <Frame name="$parentBorder" parent="SimpleBarsHealthFrame">
         <Size>
@@ -212,7 +212,7 @@
         </Anchors>
     </Frame>
 
-    <Frame name="SimpleBarsPetFrame" parent="UIParent" movable="true" enableMouse="true" topLevel="true">
+    <Button name="SimpleBarsPetFrame" parent="UIParent" movable="true" enableMouse="true" topLevel="true">
         <Size>
             <AbsDimension x="75" y="20"/>
         </Size>
@@ -281,7 +281,7 @@
                 SimpleBarsDB.petFrame.yOfs = yOfs
             </OnDragStop>
         </Scripts>
-    </Frame>
+    </Button>
 
     <Frame name="$parentBorder" parent="SimpleBarsPetFrame">
         <Size>

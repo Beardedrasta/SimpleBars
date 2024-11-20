@@ -1,5 +1,3 @@
-
-
 SimpleBars_colors = {}
 SimpleBars_options = {}
 
@@ -35,10 +33,10 @@ local reset = {
 }
 
 SimpleBars_defaultOpt = {
-    { text = "Toggles", default = nil, type = "header"},
+    { text = "Toggles",    default = nil, type = "header" },
 
     {
-        text = "Enable Class Color", 
+        text = "Enable Class Color",
         default = true,
         type = "checkbox",
         config = "useClassColorForHealth",
@@ -92,7 +90,7 @@ SimpleBars_defaultOpt = {
         end
     },
 
-    { text = "Appearance", default = nil, type = "header"},
+    { text = "Appearance", default = nil, type = "header" },
 
     {
         text = "Out of Combat Alpha",
@@ -165,11 +163,66 @@ SimpleBars_defaultOpt = {
         end
     },
 
-    { text = "Global", default = nil, type = "header"},
-    {
-        text = "Font Select", default = "", type = "dropdown", config = "globalFont",
-        func = function()
+    { text = "Global", default = nil, type = "header" },
 
+    {
+        text = "Font Select",
+        default = "",
+        type = "dropdown_font",
+        config = "globalFont",
+        func = function()
+            SB_UpdateHealthVisibility()
+            SB_UpdateManaVisibility()
+        end
+    },
+    {
+        text = "Main Bars Text Size",
+        default = "14",
+        type = "text",
+        config = "mainFontSize",
+        key = nil,
+        func = function()
+            SB_UpdateHealthVisibility()
+            SB_UpdateManaVisibility()
+        end
+    },
+    {
+        text = "Pet Bar Text Size",
+        default = "12",
+        type = "text",
+        config = "petFontSize",
+        key = nil,
+        func = function()
+            SB_UpdatePetVisibility()
+        end
+    },
+    {
+        text = "Border Select",
+        default = "",
+        type = "dropdown_border",
+        config = "globalBorder",
+        func = function()
+            SB_UpdateBorder()
+        end
+    },
+    {
+        text = "Border Size",
+        default = "14",
+        type = "text",
+        config = "borderSize",
+        key = nil,
+        func = function()
+            SB_UpdateBorder()
+        end
+    },
+    {
+        text = "Border Inset",
+        default = "14",
+        type = "text",
+        config = "borderInset",
+        key = nil,
+        func = function()
+            SB_UpdateBorder()
         end
     },
 }
@@ -245,7 +298,7 @@ opt.texture:SetPoint("TOPRIGHT", opt, "TOPRIGHT", -10, -10)
 opt.texture:SetHeight(20)
 
 opt.close = CreateFrame("Button", "SimpleBarsOptionsClose", opt)
-opt.close:SetPoint("TOPRIGHT", opt, "TOPRIGHT",  -4, -6)
+opt.close:SetPoint("TOPRIGHT", opt, "TOPRIGHT", -4, -6)
 opt.close:SetWidth(28)
 opt.close:SetHeight(28)
 opt.close.texture = opt.close:CreateTexture("SimpleBarsDialogCloseTex")
@@ -253,9 +306,9 @@ opt.close.texture:SetTexture("Interface\\AddOns\\SimpleBars\\Media\\close.blp")
 opt.close.texture:ClearAllPoints()
 opt.close.texture:SetPoint("TOPLEFT", opt.close, "TOPLEFT", 8, -8)
 opt.close.texture:SetPoint("BOTTOMRIGHT", opt.close, "BOTTOMRIGHT", -8, 8)
-opt.close.texture:SetVertexColor(1,.25,.25,1)
+opt.close.texture:SetVertexColor(1, .25, .25, 1)
 opt.close:SetScript("OnClick", function()
-  this:GetParent():Hide()
+    this:GetParent():Hide()
 end)
 
 opt.save = CreateFrame("Button", "SimpleBarsOptionsSave", opt)
@@ -269,8 +322,8 @@ opt.save.text:SetFont(STANDARD_TEXT_FONT, 14, "OUTLINE")
 opt.save.text:SetText("Confirm & Reload")
 
 function opt:LoadConfig()
-    if not SimpleBarsDB  then 
-        SimpleBarsDB  = {}
+    if not SimpleBarsDB then
+        SimpleBarsDB = {}
     end
     for id, data in pairs(SimpleBars_defaultOpt) do
         if data.config and SimpleBarsDB[data.config] == nil then
@@ -280,14 +333,14 @@ function opt:LoadConfig()
 end
 
 local maxHeight, maxWidth = 0, 0
-local width, height = 230, 26
+local width, height = 230, 29
 local maxText = 130
 local configFrames = {}
 function opt:CreateOptionsEntries(config)
     local count = 1
     for _, data in pairs(config) do
         if data.type then
-            local frame = CreateFrame("Frame", "SimpleBarsOptions"..count, opt)
+            local frame = CreateFrame("Frame", "SimpleBarsOptions" .. count, opt)
             configFrames[data.text] = frame
 
             frame.caption = frame:CreateFontString("Status", "LOW", "GameFontWhite")
@@ -334,7 +387,7 @@ function opt:CreateOptionsEntries(config)
                 frame.input = CreateFrame("EditBox", nil, frame)
                 frame.input:SetTextColor(classColorNorm.r, classColorNorm.g, classColorNorm.b)
                 frame.input:SetJustifyH("RIGHT")
-                frame.input:SetTextInsets(5,5,5,5)
+                frame.input:SetTextInsets(5, 5, 5, 5)
                 frame.input:SetWidth(32)
                 frame.input:SetHeight(16)
                 frame.input:SetPoint("RIGHT", -20, 0)
@@ -372,35 +425,46 @@ function opt:CreateOptionsEntries(config)
                 frame.input:SetScript("OnEnterPressed", function()
                     this:ClearFocus()
                 end)
-                
+
                 local b = CreateFrame("Frame", nil, frame.input)
                 b:SetPoint("TOPLEFT", frame.input, "TOPLEFT", -15, 8)
                 b:SetPoint("BOTTOMRIGHT", frame.input, "BOTTOMRIGHT", 7, -10)
                 b:SetBackdrop({
                     bgFile = "Interface\\Tooltips\\UI-Tooltip-Background",
-                    edgeFile = "Interface\\AddOns\\SimpleBars\\Media\\border.blp",
-                    tile = false, tileSize = 16, edgeSize = 16,
-                    insets = { left = 8, right = 8, top = 8, bottom = 8 }})
+                    edgeFile = "Interface\\AddOns\\SimpleBars\\Media\\Border\\border.blp",
+                    tile = false,
+                    tileSize = 16,
+                    edgeSize = 16,
+                    insets = { left = 8, right = 8, top = 8, bottom = 8 }
+                })
                 b:SetBackdropColor(0.25, 0.25, 0.25, 1)
                 b:SetBackdropBorderColor(.4, .4, .4, 1)
-                b:SetFrameLevel(frame.input:GetFrameLevel()-1)
-            elseif data.type == "dropdown" then
-                frame.input = CreateFrame("Frame", "SimpleBarsFontDropdown" .. tostring(math.random(1000)), frame, "UIDropDownMenuTemplate")
+                b:SetFrameLevel(frame.input:GetFrameLevel() - 1)
+            elseif data.type == "dropdown_font" then
+                frame.input = CreateFrame("Frame", "SimpleBarsFontDropdown" .. tostring(math.random(1000)), frame,
+                    "UIDropDownMenuTemplate")
                 frame.input:SetPoint("RIGHT", frame, "RIGHT", -115, 0)
                 frame.input.config = data.config
                 frame.input.func = data.func
 
                 UIDropDownMenu_Initialize(frame.input, function(self, level)
-            
-                    for fontName, fontPath in pairs(SimpleBarsDB.fonts) do
+                    local fontNames = {}
+                    for fontName in pairs(SimpleBarsDB.fonts) do
+                        table.insert(fontNames, fontName)
+                    end
+                    table.sort(fontNames)
+                    for _, fontName in ipairs(fontNames) do
+                        local fontPath = SimpleBarsDB.fonts[fontName]
                         local info = {}
                         info.text = fontName
                         info.value = fontPath
                         info.func = function()
-                            --UIDropDownMenu_SetSelectedValue(frame.input, info.value)
+                            -- Save the selected font to the database
                             SimpleBarsDB[frame.input.config] = info.value
             
+                            -- Set the selected value in the dropdown
                             UIDropDownMenu_SetSelectedValue(frame.input, SimpleBarsDB[frame.input.config])
+            
                             -- Call the provided function if it exists
                             frame.input.func()
                         end
@@ -413,18 +477,60 @@ function opt:CreateOptionsEntries(config)
                 else
                     UIDropDownMenu_SetSelectedValue(frame.input, SimpleBarsDB.fonts["Blank"]) -- Set to default value
                 end
+            elseif data.type == "dropdown_border" then
+                frame.input = CreateFrame("Frame", "SimpleBarsBorderDropdown" .. tostring(math.random(1000)), frame,
+                    "UIDropDownMenuTemplate")
+                frame.input:SetPoint("RIGHT", frame, "RIGHT", -115, 0)
+                frame.input.config = data.config
+                frame.input.func = data.func
 
-                --UIDropDownMenu_SetWidth(frame.input, 150)
-                --UIDropDownMenu_SetButtonWidth(frame.input, 124)
-                --UIDropDownMenu_JustifyText(frame.input, "LEFT")
+                UIDropDownMenu_Initialize(frame.input, function(self, level)
+                    local borderNames = {}
+                    for borderName in pairs(SimpleBarsDB.borders) do
+                        table.insert(borderNames, borderName)
+                    end
+                    table.sort(borderNames)
+
+                    for _, borderName in ipairs(borderNames) do
+                        local borderPath = SimpleBarsDB.borders[borderName]
+                        SB_print("Adding border:", borderName, borderPath)
+            
+                        if borderName and borderPath then
+                            local info = {}
+                            info.text = borderName
+                            info.value = borderPath
+                            info.func = function()
+                                -- Save the selected border to the database
+                                SimpleBarsDB[frame.input.config] = info.value
+            
+                                -- Set the selected value in the dropdown
+                                UIDropDownMenu_SetSelectedValue(frame.input, SimpleBarsDB[frame.input.config])
+            
+                                -- Call the provided function if it exists
+                                if frame.input.func then
+                                    frame.input.func()
+                                end
+                            end
+            
+                            UIDropDownMenu_AddButton(info, level)
+                        else
+                            SB_print("Error: Missing border data - borderName:", borderName, " borderPath:", borderPath)
+                        end
+                    end
+                end)
+                if SimpleBarsDB[data.config] then
+                    UIDropDownMenu_SetSelectedValue(frame.input, SimpleBarsDB[data.config])
+                else
+                    UIDropDownMenu_SetSelectedValue(frame.input, SimpleBarsDB.borders["Simple"]) -- Set to default value
+                end
             end
 
             if frame.input and SimpleBars.api.emulated then
-                frame.input:SetWidth(frame.input:GetWidth()/.6)
-                frame.input:SetHeight(frame.input:GetHeight()/.6)
+                frame.input:SetWidth(frame.input:GetWidth() / .6)
+                frame.input:SetHeight(frame.input:GetHeight() / .6)
                 frame.input:SetScale(.8)
                 if frame.input.SetTextInsets then
-                    frame.input:SetTextInsets(8,8,8,8)
+                    frame.input:SetTextInsets(8, 8, 8, 8)
                 end
             end
             count = count + 1
@@ -435,7 +541,7 @@ function opt:CreateOptionsEntries(config)
     local column, row = 1, 0
     for _, data in pairs(config) do
         if data.type then
-            row = row + ( data.type == "header" and row > 1 and 2 or 1)
+            row = row + (data.type == "header" and row > 1 and 2 or 1)
             if row > 20 and data.type == "header" then
                 column, row = column + 1, 1
             end
@@ -451,7 +557,7 @@ function opt:CreateOptionsEntries(config)
         end
     end
     local spacer = (maxWidth - 1) * 20
-    opt:SetWidth(maxWidth  *width + spacer + 20)
+    opt:SetWidth(maxWidth * width + spacer + 20)
     opt:SetHeight(maxHeight * height + 100)
 end
 
@@ -462,7 +568,8 @@ function opt:UpdateOptionsEntries()
                 configFrames[data.text].input:SetChecked((SimpleBarsDB[data.config] == true and true or nil))
             elseif data.type == "text" then
                 if data.key then
-                    configFrames[data.text].input:SetText(tostring(SimpleBarsDB[configFrames[data.text].input.config][configFrames[data.text].input.key]))
+                    configFrames[data.text].input:SetText(tostring(SimpleBarsDB[configFrames[data.text].input.config]
+                    [configFrames[data.text].input.key]))
                 else
                     configFrames[data.text].input:SetText(tostring(SimpleBarsDB[configFrames[data.text].input.config]))
                 end

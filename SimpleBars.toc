@@ -12,6 +12,7 @@ Helpers\AceLibrary\AceLibrary.lua
 Helpers\AceOO-2.0\AceOO-2.0.lua
 Helpers\AceEvent-2.0\AceEvent-2.0.lua
 Helpers\DruidManaLib-1.0\DruidManaLib-1.0.lua
+Helpers\Dewdrop\Dewdrop-2.0.lua
 
 SimpleBars.xml
 Tick\Frame.xml

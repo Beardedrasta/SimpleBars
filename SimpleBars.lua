@@ -22,9 +22,9 @@ element.enable = function()
         local border = CreateFrame("Frame", nil, parent)
         border:SetBackdrop({
             edgeFile = borderTexture,
-            edgeSize = 14,
+            edgeSize = SimpleBarsDB.borderSize,
         })
-        border:SetBackdropBorderColor(0.25, 0.25, 0.25, 1)
+        --border:SetBackdropBorderColor(0.25, 0.25, 0.25, 1)
         border:SetFrameLevel(4)
         border:EnableMouse(false)
         return border
@@ -32,14 +32,18 @@ element.enable = function()
 
     -- Health and Mana frame references
     local HealthBar, ManaBar, PetBar = _G["SimpleBarsHealthFrame"], _G["SimpleBarsManaFrame"], _G["SimpleBarsPetFrame"]
-    local HealthStatus, ManaStatus, PetStatus = _G["SimpleBars_HealthBar"], _G["SimpleBars_ManaBar"], _G["SimpleBars_PetBar"]
-    local HealthText, ManaText, PetText = _G["SimpleBars_HealthBarText"], _G["SimpleBars_ManaBarText"], _G["SimpleBars_PetBarText"]
+    local HealthStatus, ManaStatus, PetStatus = _G["SimpleBars_HealthBar"], _G["SimpleBars_ManaBar"],
+        _G["SimpleBars_PetBar"]
+    local HealthText, ManaText, PetText = _G["SimpleBars_HealthBarText"], _G["SimpleBars_ManaBarText"],
+        _G["SimpleBars_PetBarText"]
     local AltPower, AltPowerText = _G["SimpleBars_AltPower"], _G["SimpleBars_AltPowerText"]
-    local healthSettings, manaSettings, petSettings = SimpleBarsDB.healthFrame, SimpleBarsDB.manaFrame, SimpleBarsDB.petFrame
+    local healthSettings, manaSettings, petSettings = SimpleBarsDB.healthFrame, SimpleBarsDB.manaFrame,
+        SimpleBarsDB.petFrame
 
     -- Initialize Health Bar
     HealthBar:ClearAllPoints()
-    HealthBar:SetPoint(healthSettings.point, UIParent, healthSettings.relativePoint, healthSettings.xOfs, healthSettings.yOfs)
+    HealthBar:SetPoint(healthSettings.point, UIParent, healthSettings.relativePoint, healthSettings.xOfs,
+        healthSettings.yOfs)
     HealthBar:RegisterForDrag("LeftButton")
     HealthBar:SetFrameLevel(3)
     HealthStatus:ClearAllPoints()
@@ -53,8 +57,66 @@ element.enable = function()
     HealthText:SetFontObject(SimpleBarsCustomFont)
     HealthText:SetJustifyH("CENTER")
     HealthText:Hide()
-    HealthBar.border = InitializeBorder(HealthBar, "Interface\\AddOns\\SimpleBars\\Media\\border.blp")
+    HealthBar.border = InitializeBorder(HealthBar, SimpleBarsDB.globalBorder)
     HealthBar.border:SetPoint("CENTER", 0, 0)
+
+    local PlayerFrameDropDown = CreateFrame("Frame", "PlayerFrameDropDown", UIParent)
+
+
+    local function initPlayerDropDown(self, level)
+        UnitPopup_ShowMenu(PlayerFrameDropDown, "SELF", "player")
+        if not (UnitInRaid("player") or GetNumPartyMembers() > 0) or UnitIsPartyLeader("player") and PlayerFrameDropDown.init and not CanShowResetInstances() then
+            PlayerFrameDropDown.init = nil
+        end
+    end
+
+    local function ShowMenu()
+        if (this.unit == "player") then
+            UIDropDownMenu_Initialize(PlayerFrameDropDown, initPlayerDropDown, "MENU")
+            PlayerFrameDropDown.init = true
+            ToggleDropDownMenu(1, nil, PlayerFrameDropDown, "cursor")
+        elseif (this.unit == "pet") then
+            ToggleDropDownMenu(1, nil, PetFrameDropDown, "cursor")
+        elseif (this.unit == "target") then
+            ToggleDropDownMenu(1, nil, TargetFrameDropDown, "cursor")
+        elseif (this.unitGroup == "party") then
+            local partyFrameDropdown = getglobal("PartyMemberFrame" .. string.sub(this.unit, 6) .. "DropDown")
+            if partyFrameDropdown then
+                ToggleDropDownMenu(1, nil, partyFrameDropdown, "cursor")
+            end
+        elseif (this.unitGroup == "raid") then
+            HideDropDownMenu(1)
+            local name = UnitName(this.unit)
+            local id = string.sub(this.unit, 5)
+            local unit = this.unit
+            local menuFrame = FriendsDropDown
+            menuFrame.displayMode = "MENU"
+            menuFrame.initialize = function() UnitPopup_ShowMenu(getglobal(UIDROPDOWNMENU_OPEN_MENU), "PARTY", unit, name, id) end
+            ToggleDropDownMenu(1, nil, FriendsDropDown, "cursor")
+        end
+    end
+
+    local function OnClick(button)
+        --[[ if arg1 == "UNKNOWN" then
+            arg1 =
+        end ]]
+        --local button = ( IsControlKeyDown() and "Ctrl-" or "" ) .. ( IsShiftKeyDown() and "Shift-" or "" ) .. ( IsAltKeyDown() and "Alt-" or "" ) .. arg1
+        if button == "RightButton" then
+            this:ShowMenu()
+        elseif button == "LeftButton" then
+            TargetUnit(this.unit)
+        end
+    end
+
+    HealthBar:RegisterForClicks('LeftButtonUp', 'RightButtonUp', 'MiddleButtonUp')
+    HealthBar.unit = "player"
+    HealthBar.ShowMenu = ShowMenu
+    HealthBar:SetScript("OnClick", function()
+        OnClick(arg1)
+    end)
+    HealthBar:SetClampedToScreen(1)
+
+
 
     -- Initialize Mana Bar
     ManaBar:ClearAllPoints()
@@ -73,7 +135,7 @@ element.enable = function()
     ManaText:SetFontObject(SimpleBarsCustomFont)
     ManaText:SetJustifyH("CENTER")
     ManaText:Hide()
-    ManaBar.border = InitializeBorder(ManaBar, "Interface\\AddOns\\SimpleBars\\Media\\border.blp")
+    ManaBar.border = InitializeBorder(ManaBar, SimpleBarsDB.globalBorder)
     ManaBar.border:SetPoint("CENTER", 0, 0)
 
 
@@ -88,8 +150,17 @@ element.enable = function()
     PetStatus:SetStatusBarColor(unpack(petSettings.statusBarColor))
     PetStatus:SetFrameLevel(3)
     PetText:SetFontObject(SimpleBarsCustomFont_Pet)
-    PetBar.border = InitializeBorder(PetBar, "Interface\\AddOns\\SimpleBars\\Media\\border.blp")
+    PetText:Hide()
+    PetBar.border = InitializeBorder(PetBar, SimpleBarsDB.globalBorder)
     PetBar.border:SetPoint("CENTER", 0, 0)
+
+    PetBar:RegisterForClicks('LeftButtonUp', 'RightButtonUp', 'MiddleButtonUp')
+    PetBar.unit = "pet"
+    PetBar.ShowMenu = ShowMenu
+    PetBar:SetScript("OnClick", function()
+        OnClick(arg1)
+    end)
+    PetBar:SetClampedToScreen(1)
 
 
     AltPower:SetWidth(manaSettings.width / 2)
@@ -107,18 +178,18 @@ element.enable = function()
     AltPower.bg = bg
 
     local bd = CreateFrame("Frame", "$parentBorder", AltPower)
-    bd:SetWidth(SimpleBarsDB.manaFrame.width / 2 + 14)
-    bd:SetHeight(26)
+    bd:SetWidth(manaSettings.width / 2 + SimpleBarsDB.borderInset)
+    bd:SetHeight(SimpleBarsDB.altFrame.height + SimpleBarsDB.borderInset)
     bd:SetPoint("CENTER", 0, 0)
     bd:SetBackdrop({
-        edgeFile = "Interface\\AddOns\\SimpleBars\\Media\\border.blp",
-        edgeSize = 13,
-    }) 
-    bd:SetBackdropBorderColor(0.25, 0.25, 0.25, 1)
+        edgeFile = SimpleBarsDB.globalBorder,
+        edgeSize = SimpleBarsDB.borderSize,
+    })
+    --bd:SetBackdropBorderColor(0.25, 0.25, 0.25, 1)
     bd:SetFrameLevel(AltPower:GetFrameLevel() + 1)
     AltPower.bd = bd
 
---[[     local bd = AltPower:CreateTexture("$parentBorder", "OVERLAY")
+    --[[     local bd = AltPower:CreateTexture("$parentBorder", "OVERLAY")
 	bd:SetWidth(SimpleBarsDB.manaFrame.width / 2 + 18)
 	bd:SetHeight(18)
 	bd:SetTexture("Interface\\CharacterFrame\\UI-CharacterFrame-GroupIndicator")
@@ -128,9 +199,9 @@ element.enable = function()
     AltPower.bd = bd ]]
 
 
-	SetTextStatusBarText(AltPower, AltPowerText)
-	AltPower.textLockable = 1
-	AltPower.text = AltPowerText
+    SetTextStatusBarText(AltPower, AltPowerText)
+    AltPower.textLockable = 1
+    AltPower.text = AltPowerText
 
     local function SetupMouseover(frame, text)
         frame:SetScript("OnEnter", function()
@@ -158,19 +229,20 @@ element.enable = function()
         local currMana, maxMana = DruidLib:GetMana()
         AltPower:SetMinMaxValues(0, maxMana)
         AltPower:SetValue(currMana)
-        AltPowerText:SetText(currMana.."/"..maxMana)
+        AltPowerText:SetText(currMana .. "/" .. maxMana)
     end
 
     local function UpdateAltPower()
         if UnitPowerType("player") ~= 0 and playerClass == "DRUID" then
             AltPower:Show()
-            AltPower.bd:SetWidth(manaSettings.width / 2 + 14)
+            bd:SetWidth(manaSettings.width / 2 + SimpleBarsDB.borderInset)
+            bd:SetHeight(SimpleBarsDB.altFrame.height + SimpleBarsDB.borderInset)
         else
             AltPower:Hide()
         end
     end
 
-    
+
     function AltOnEvent(event)
         if event == "PLAYER_ENTERING_WORLD" then
             UpdateAltPower()
@@ -179,7 +251,7 @@ element.enable = function()
             UpdateAltPower()
             UpdateAltPowerValue()
         end
-        if event == "UNIT_MANA" or event == "UNIT_MAXMANA"  then
+        if event == "UNIT_MANA" or event == "UNIT_MAXMANA" then
             UpdateAltPowerValue()
         elseif event == "PLAYER_REGEN_ENABLED" or event == "PLAYER_REGEN_ENABLED" then
             UpdateAltPowerValue()
@@ -189,7 +261,6 @@ element.enable = function()
     function AltOnUpdate()
         UpdateAltPowerValue()
     end
-
 
     -- Function to update health bar values
     function SB_UpdateHealth(statusbar, fontString)
@@ -259,7 +330,7 @@ element.enable = function()
             UpdateMana(ManaStatus, ManaText)
             UpdatePowerType(ManaStatus)
         end
-        if event =="UNIT_RAGE" or event == "UNIT_MAXRAGE" then
+        if event == "UNIT_RAGE" or event == "UNIT_MAXRAGE" then
             UpdateMana(ManaStatus, ManaText)
             UpdatePowerType(ManaStatus)
         end
@@ -281,7 +352,6 @@ element.enable = function()
         end
     end
 
-
     -- Update functions to manage bar visibility
     function SB_UpdateHealthVisibility()
         if SimpleBarsDB.enableHealth then
@@ -291,8 +361,9 @@ element.enable = function()
         end
         HealthBar:SetWidth(healthSettings.width)
         HealthBar:SetHeight(healthSettings.height)
-        HealthBar.border:SetWidth(healthSettings.width + 14)
-        HealthBar.border:SetHeight(healthSettings.height + 14)
+        HealthBar.border:SetWidth(healthSettings.width + SimpleBarsDB.borderInset)
+        HealthBar.border:SetHeight(healthSettings.height + SimpleBarsDB.borderInset)
+        SimpleBarsCustomFont:SetFont(SimpleBarsDB.globalFont, SimpleBarsDB.mainFontSize, "")
     end
 
     function SB_UpdateManaVisibility()
@@ -303,10 +374,13 @@ element.enable = function()
         end
         ManaBar:SetWidth(manaSettings.width)
         ManaBar:SetHeight(manaSettings.height)
-        ManaBar.border:SetWidth(manaSettings.width + 14)
-        ManaBar.border:SetHeight(manaSettings.height + 14)
+        ManaBar.border:SetWidth(manaSettings.width + SimpleBarsDB.borderInset)
+        ManaBar.border:SetHeight(manaSettings.height + SimpleBarsDB.borderInset)
         AltPower:SetWidth(manaSettings.width / 2)
-        AltPower.bd:SetWidth(manaSettings.width / 2 + 14)
+        AltPower.bd:SetWidth(manaSettings.width / 2 + SimpleBarsDB.borderInset)
+        AltPower.bd:SetHeight(SimpleBarsDB.altFrame.height + SimpleBarsDB.borderInset)
+        SimpleBarsCustomFont:SetFont(SimpleBarsDB.globalFont, SimpleBarsDB.mainFontSize, "")
+        SimpleBarsCustomFont_Alt:SetFont(SimpleBarsDB.globalFont, 12, "")
     end
 
     function SB_UpdatePetVisibility()
@@ -321,8 +395,9 @@ element.enable = function()
         end
         PetBar:SetWidth(petSettings.width)
         PetBar:SetHeight(petSettings.height)
-        PetBar.border:SetWidth(petSettings.width + 14)
-        PetBar.border:SetHeight(petSettings.height + 14)
+        PetBar.border:SetWidth(petSettings.width + SimpleBarsDB.borderInset)
+        PetBar.border:SetHeight(petSettings.height + SimpleBarsDB.borderInset)
+        SimpleBarsCustomFont_Pet:SetFont(SimpleBarsDB.globalFont, SimpleBarsDB.petFontSize, "")
     end
 
     function SB_UpdateFade()
@@ -343,6 +418,33 @@ element.enable = function()
         end
     end
 
+    function SB_UpdateBorder()
+        local borderDB = SimpleBarsDB.globalBorder
+        HealthBar.border:SetBackdrop({
+            edgeFile = borderDB,
+            edgeSize = SimpleBarsDB.borderSize,
+        })
+        ManaBar.border:SetBackdrop({
+            edgeFile = borderDB,
+            edgeSize = SimpleBarsDB.borderSize,
+        })
+        PetBar.border:SetBackdrop({
+            edgeFile = borderDB,
+            edgeSize = SimpleBarsDB.borderSize,
+        })
+        AltPower.bd:SetBackdrop({
+            edgeFile = borderDB,
+            edgeSize = SimpleBarsDB.borderSize,
+        })
+        HealthBar.border:SetWidth(healthSettings.width + SimpleBarsDB.borderInset)
+        HealthBar.border:SetHeight(healthSettings.height + SimpleBarsDB.borderInset)
+        ManaBar.border:SetWidth(manaSettings.width + SimpleBarsDB.borderInset)
+        ManaBar.border:SetHeight(manaSettings.height + SimpleBarsDB.borderInset)
+        PetBar.border:SetWidth(petSettings.width + SimpleBarsDB.borderInset)
+        PetBar.border:SetHeight(petSettings.height + SimpleBarsDB.borderInset)
+        AltPower.bd:SetWidth(manaSettings.width / 2 + SimpleBarsDB.borderInset)
+        AltPower.bd:SetHeight(SimpleBarsDB.altFrame.height + SimpleBarsDB.borderInset)
+    end
 
     -- Event handling for updating the status bars
     local function OnEvent(self, event)
@@ -350,9 +452,6 @@ element.enable = function()
         SB_UpdateManaVisibility()
         SB_UpdatePetVisibility()
         SB_UpdateFade()
-        SimpleBarsCustomFont:SetFont(SimpleBarsDB.globalFont, 14, "")
-        SimpleBarsCustomFont_Alt:SetFont(SimpleBarsDB.globalFont, 12, "")
-        SimpleBarsCustomFont_Pet:SetFont(SimpleBarsDB.globalFont, 12, "")
     end
 
     statusbars:RegisterEvent("PLAYER_ENTERING_WORLD")
@@ -397,14 +496,12 @@ element.enable = function()
             SB_UpdateManaVisibility()
         elseif msg == "toggle pet" then
             SimpleBarsDB.enablePet = not SimpleBarsDB.enablePet
-            SB_print("Pet Bar: ".. (SimpleBarsDB.enablePet and "Enabled" or "Disabled"))
+            SB_print("Pet Bar: " .. (SimpleBarsDB.enablePet and "Enabled" or "Disabled"))
             SB_UpdatePetVisibility()
         elseif msg == "toggle ooc" then
             SimpleBarsDB.oocFade = not SimpleBarsDB.oocFade
             SB_print("Out of Combat fading: " .. (SimpleBarsDB.oocFade and "Enabled" or "Disabled"))
             SB_UpdateFade()
-        elseif msg == "ooc alpha" then
-            local value = tonumber(rest)
         elseif msg == "reset" then
             SimpleBarsDB = nil
             ReloadUI()
@@ -455,7 +552,7 @@ element.enable = function()
                         end
                     end
                 elseif command == "pet" then
-                    local secondSpace = string.find(rest, " ")                   
+                    local secondSpace = string.find(rest, " ")
                     if secondSpace then
                         local subCommand = string.sub(rest, 1, secondSpace - 1)
                         local value = tonumber(string.sub(rest, secondSpace + 1))
