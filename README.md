@@ -11,7 +11,7 @@ Each element is designed to be simple, compact, and fit the wow theme asthetics.
 ## Installation
 1. Download **[Latest Version](https://github.com/Beardedrasta/SimpleBars/archive/refs/heads/main.zip)**
 2. Unpack the Zip file
-3. Rename the folder "SimpleBars-Release" to "SimpleBars"
+3. Rename the folder "SimpleBars-main" to "SimpleBars"
 4. Copy "SimpleBars" into WoW\Inteface\AddOns
 5. Restart WoW Client
 
@@ -22,6 +22,15 @@ Each element is designed to be simple, compact, and fit the wow theme asthetics.
 
 **Power Bar**
 *Display the players power value in a statusbar, Current Power > Max Power text values.*
+
+**Pet Bar**
+*Display the pet health value in a statusbar, Current Health > Max Health text values.*
+
+**Druid Bar**
+*Display the druid mana value in a statusbar, Current Mana > Max Mana text values.*
+
+**Mana Ticks and Value**
+*Display the mana tick overlay and mana recieved.*
 
 ## Commands
 
